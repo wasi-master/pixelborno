@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+
+# Built, not authored. CI attaches it to a release; `python3 tools/build.py`
+# reproduces it from sources/ in about two seconds.
+dist/
+*.zip

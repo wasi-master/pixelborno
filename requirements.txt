@@ -1,0 +1,7 @@
+# Pinned rather than floored: the outlines this build produces depend on how
+# fontTools compiles them, and a font that quietly changes shape between two
+# green CI runs is worse than one that fails to build.
+fonttools==4.59.2
+numpy==2.2.6
+pillow==11.3.0
+brotli==1.1.0

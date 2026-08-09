@@ -1,0 +1,53 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release, e.g. v1.0.1"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Built here rather than taken from dist/, so what ships is what these
+      # sources and this script produce — not whatever was committed.
+      - name: Build the font
+        run: python3 tools/build.py
+
+      - name: Check it
+        run: python3 tools/check.py
+
+      - name: Render the specimens
+        run: python3 tools/specimen.py
+
+      - name: Package
+        run: |
+          VERSION="${{ github.event.inputs.tag || github.ref_name }}"
+          mkdir -p "pixelborno-$VERSION"
+          cp dist/Pixelborno-Regular.ttf OFL.txt README.md "pixelborno-$VERSION/"
+          cp -r specimens "pixelborno-$VERSION/specimens"
+          zip -r "pixelborno-$VERSION.zip" "pixelborno-$VERSION"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/Pixelborno-Regular.ttf
+            pixelborno-*.zip
